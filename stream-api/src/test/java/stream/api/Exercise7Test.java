@@ -3,6 +3,7 @@ package stream.api;
 import common.test.tool.annotation.Easy;
 import common.test.tool.dataset.ClassicOnlineStore;
 import common.test.tool.entity.Customer;
+import common.test.tool.entity.Item;
 import common.test.tool.entity.Shop;
 
 import org.junit.Test;
@@ -40,7 +41,7 @@ public class Exercise7Test extends ClassicOnlineStore {
          * Create {@link LongStream} with all items' prices using {@link Stream#mapToLong}
          * Then calculate the sum of prices using {@link LongStream#sum}
          */
-        LongStream priceStream = null;
+        LongStream priceStream = shopList.stream().flatMapToLong(shop -> shop.getItemList().stream().mapToLong(Item::getPrice));
         long priceSum = priceStream.sum();
 
         assertThat(priceSum, is(60930L));
