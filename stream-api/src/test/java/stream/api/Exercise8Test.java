@@ -47,8 +47,12 @@ public class Exercise8Test extends ClassicOnlineStore {
          * If there is several same items with different prices, customer can choose the cheapest one.
          */
         List<Item> onSale = shopStream.flatMap(shop -> shop.getItemList().stream()).sorted(Comparator.comparing(Item::getPrice)).collect(Collectors.toList());
-        Predicate<Customer> havingEnoughMoney = null;
-        List<String> customerNameList = customerStream.map(Customer::getName).collect(Collectors.toList());
+        Predicate<Customer> havingEnoughMoney = customer -> onSale.stream()
+                .filter(item -> customer.getWantToBuy().stream()
+                        .anyMatch(item1 -> item1.getName().equals(item.getName())))
+                .filter(item2 -> onSale.stream().filter(item3 -> item3.getName().equals(item2.getName()))
+                        .min(Comparator.comparingInt(Item::getPrice)).get() == item2).mapToInt(Item::getPrice).sum() <= customer.getBudget();
+        List<String> customerNameList = customerStream.filter(havingEnoughMoney).map(Customer::getName).collect(Collectors.toList());
 
         assertThat(customerNameList, hasSize(7));
         assertThat(customerNameList, hasItems("Joe", "Patrick", "Chris", "Kathy", "Alice", "Andrew", "Amy"));
